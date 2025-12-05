@@ -1,0 +1,33 @@
+{
+  "name": "productive-youtube",
+  "version": "2.0.1",
+  "description": "Transform YouTube into a productivity tool - Block distractions and stay focused",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && npm run copy-files",
+    "preview": "vite preview",
+    "watch": "vite build --watch",
+    "clean": "rimraf dist",
+    "copy-files": "node -e \"const fs=require('fs'); fs.copyFileSync('public/manifest.json','dist/manifest.json'); fs.mkdirSync('dist/icons',{recursive:true}); try{const iconFiles=['icon16.png','icon48.png','icon128.png']; iconFiles.forEach(f=>{if(fs.existsSync('public/icons/'+f)) fs.copyFileSync('public/icons/'+f,'dist/icons/'+f);}); fs.copyFileSync('dist/src/popup.html','dist/popup.html'); let html=fs.readFileSync('dist/popup.html','utf8'); html=html.replace('../popup.js','./popup.js').replace('../popup.css','./popup.css'); fs.writeFileSync('dist/popup.html',html); fs.rmSync('dist/src',{recursive:true});}catch(e){} console.log('Files copied successfully');\"",
+    "package": "npm run build && zip -r extension.zip dist/*"
+  },
+  "dependencies": {
+    "lucide-react": "^0.552.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "rimraf": "^5.0.5",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.8"
+  }
+}
