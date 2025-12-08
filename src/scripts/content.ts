@@ -863,6 +863,26 @@ function decodeHtmlEntities(text: string): string {
   return textArea.value;
 }
 
+// Helper function to clean transcript text
+function cleanTranscriptText(text: string): string {
+  // Remove [Music], [Applause], and similar tags
+  text = text.replace(/\[music\]/gi, "");
+  text = text.replace(/\[applause\]/gi, "");
+  text = text.replace(/\[laughter\]/gi, "");
+  text = text.replace(/\[.*?\]/g, ""); // Remove any other bracketed content
+
+  // Remove >> symbols (speaker indicators)
+  text = text.replace(/>>+/g, "");
+
+  // Remove multiple spaces
+  text = text.replace(/\s+/g, " ");
+
+  // Remove leading/trailing spaces
+  text = text.trim();
+
+  return text;
+}
+
 function displayTranscript(transcript: { text: string; start: number }[]) {
   console.log(
     "Productive YouTube: displayTranscript function called with",
@@ -932,8 +952,13 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
   let currentChunk: { start: number; text: string } | null = null;
 
   transcript.forEach((line) => {
-    // Decode HTML entities in the text
-    const decodedText = decodeHtmlEntities(line.text);
+    // Decode HTML entities and clean the text
+    let decodedText = decodeHtmlEntities(line.text);
+    decodedText = cleanTranscriptText(decodedText);
+
+    // Skip if text is empty after cleaning
+    if (!decodedText) return;
+
     const chunkStart = Math.floor(line.start / CHUNK_SIZE) * CHUNK_SIZE; // Round down to nearest chunk
 
     if (!currentChunk || currentChunk.start !== chunkStart) {
