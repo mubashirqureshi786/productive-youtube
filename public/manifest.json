@@ -7,8 +7,12 @@
   "host_permissions": [
     "*://*.youtube.com/*",
     "https://www.youtube.com/youtubei/v1/player*",
-    "https://www.youtube.com/watch*"
+    "https://www.youtube.com/watch*",
+    "https://api.mymemory.translated.net/*"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.youtube.com/*"],

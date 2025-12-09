@@ -10,11 +10,15 @@ export default defineConfig({
       input: {
         popup: "src/popup.html",
         content: "src/scripts/content.ts",
+        background: "src/background.ts",
       },
       output: {
         entryFileNames: (chunkInfo) => {
           if (chunkInfo.name === "content") {
             return "content_script.js";
+          }
+          if (chunkInfo.name === "background") {
+            return "background.js";
           }
           return "[name].js";
         },
