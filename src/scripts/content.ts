@@ -1,5 +1,8 @@
 // console.log("Productive YouTube: Content script loaded");
 
+// Import Lucide React icons
+import { Copy, RefreshCcw } from "lucide-react";
+
 // Type definitions
 interface VideoInfo {
   title: string;
@@ -684,6 +687,10 @@ function getVideoId() {
 async function fetchVideoPage(videoId: string) {
   console.log(`Fetching video page for video ID: ${videoId}`);
   const response = await fetch(`https://www.youtube.com/watch?v=${videoId}`);
+  console.log(
+    "fetch youtube video response is -------------------------------",
+    response
+  );
   return response.text();
 }
 
@@ -1011,14 +1018,18 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
     container.className = "transcript-container";
     // Add inline styles with !important flags to ensure visibility
     container.style.cssText = `
-      background: rgba(255, 255, 255, 0.85) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      border: 1px solid rgba(229, 231, 235, 0.5) !important;
-      border-radius: 0.5rem !important;
-      margin-bottom: 1rem !important;
-      margin-top: 1rem !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+      background: transparent !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border: 3px solid #fff !important;
+
+      border-radius: 12px !important;
+      margin-bottom: 1.5rem !important;
+      margin-top: 1.5rem !important;
+      box-shadow: rgba(255, 255, 255, 0.9) 0px 6px 12px -2px,
+            rgba(255, 255, 255, 0.6) 0px 3px 7px -3px !important;
+
+
       width: 100% !important;
       max-width: 400px !important;
       z-index: 1000 !important;
@@ -1026,6 +1037,7 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
       visibility: visible !important;
       opacity: 1 !important;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+      overflow: hidden !important;
     `;
     secondary.prepend(container);
     console.log(
@@ -1040,24 +1052,28 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem;
-    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 3px solid rgba(229, 231, 235, 0.6);
     cursor: pointer;
-    background-color: rgba(249, 250, 251, 0.5);
+    background: linear-gradient(135deg, rgba(249, 250, 251, 0.8) 0%, rgba(243, 244, 246, 0.6) 100%);
+    gap: 1rem;
   `;
   container.appendChild(header);
 
   const title = document.createElement("div");
   title.className = "transcript-title";
-  title.textContent = "Video Transcript";
+  title.textContent = "📖 Video Transcript";
   // Add inline styles for title
   title.style.cssText = `
-    font-size: 2rem;
-    font-weight: 600;
+    font-size: 16px;
+    line-height: 0.5em;
+    font-weight: 700;
     color: #1f2937;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    letter-spacing: -0.01em;
   `;
   header.appendChild(title);
 
@@ -1071,69 +1087,147 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
   `;
   arrowSpan.textContent = "▲";
   title.appendChild(arrowSpan);
-
+  const headerButtons = document.createElement("div");
+  headerButtons.className = "transcript-header-buttons";
+  headerButtons.style.cssText = `
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    `;
+  header.appendChild(headerButtons);
   const copyButton = document.createElement("button");
   copyButton.className = "transcript-copy-button";
-  copyButton.textContent = "Copy Text";
+  copyButton.title = "Copy transcript to clipboard";
+  // Create SVG for Copy icon from Lucide
+  const copyIconSvg = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  copyIconSvg.setAttribute("width", "20");
+  copyIconSvg.setAttribute("height", "20");
+  copyIconSvg.setAttribute("viewBox", "0 0 24 24");
+  copyIconSvg.setAttribute("fill", "none");
+  copyIconSvg.setAttribute("stroke", "currentColor");
+  copyIconSvg.setAttribute("stroke-width", "2");
+  copyIconSvg.setAttribute("stroke-linecap", "round");
+  copyIconSvg.setAttribute("stroke-linejoin", "round");
+  copyIconSvg.innerHTML = `
+    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+  `;
+  copyButton.appendChild(copyIconSvg);
   // Add inline styles for copy button
   copyButton.style.cssText = `
-    background-color:#2986cc;
-    color: #eef3fa;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 2rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
+    color: #3b82f6;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 20px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     cursor: pointer;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
   `;
   copyButton.onmouseover = () => {
-    copyButton.style.backgroundColor = "#008df7";
+    // copyButton.style.background = "rgba(59, 130, 246, 0.1)";
+    copyButton.style.color = "#2563eb";
+    copyButton.style.transform = "scale(1.1)";
   };
   copyButton.onmouseout = () => {
-    copyButton.style.backgroundColor = "#2986cc";
+    // copyButton.style.background = "transparent";
+    copyButton.style.color = "#3b82f6";
+    copyButton.style.transform = "scale(1)";
   };
   copyButton.onclick = (e) => {
     e.stopPropagation(); // Prevent header click event from triggering
+    // Format transcript by 25-second chunks instead of individual lines
     const transcriptText = chunkedTranscript
-      .flatMap((chunk) => chunk.lines)
-      .map((line) => `[${formatTimestamp(line.start)}] ${line.text}`)
-      .join(" \n\n");
+      .map((chunk) => {
+        const chunkTimestamp = formatTimestamp(chunk.start);
+        const chunkText = chunk.lines.map((line) => line.text).join(" ");
+        return `[${chunkTimestamp}] ${chunkText}`;
+      })
+      .join("\n\n");
     navigator.clipboard.writeText(transcriptText);
-    copyButton.textContent = "Copied!";
+    // Show checkmark
+    copyButton.style.color = "#10b981";
+    const svg = copyButton.querySelector("svg");
+    if (svg) {
+      svg.innerHTML = `
+        <polyline points="20 6 9 17 4 12"></polyline>
+      `;
+    }
     setTimeout(() => {
-      copyButton.textContent = "Copy Text";
+      // Restore copy icon
+      if (svg) {
+        svg.innerHTML = `
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+        `;
+      }
+      copyButton.style.color = "#3b82f6";
     }, 2000);
   };
-  header.appendChild(copyButton);
+  headerButtons.appendChild(copyButton);
 
   // Create sync button
   const syncButton = document.createElement("button");
   syncButton.className = "transcript-sync-button";
-  syncButton.textContent = "⟳ Sync";
   syncButton.title = "Scroll to current timestamp";
+  // Create SVG for RefreshCcw icon from Lucide
+  const syncIconSvg = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
+  syncIconSvg.setAttribute("width", "20");
+  syncIconSvg.setAttribute("height", "20");
+  syncIconSvg.setAttribute("viewBox", "0 0 24 24");
+  syncIconSvg.setAttribute("fill", "none");
+  syncIconSvg.setAttribute("stroke", "currentColor");
+  syncIconSvg.setAttribute("stroke-width", "2");
+  syncIconSvg.setAttribute("stroke-linecap", "round");
+  syncIconSvg.setAttribute("stroke-linejoin", "round");
+  syncIconSvg.innerHTML = `
+    <path d="M1 4v6h6"></path>
+    <path d="M23 20v-6h-6"></path>
+    <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path>
+  `;
+  syncButton.appendChild(syncIconSvg);
   // Add inline styles for sync button
   syncButton.style.cssText = `
-    background-color: #10b981;
-    color: #ffffff;
-    padding: 0.25rem 0.75rem;
-    border-radius: 0.375rem;
-    font-size: 2rem;
-    font-weight: 500;
-    transition: background-color 0.2s;
+    background: transparent;
+    color: #10b981;
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 20px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     cursor: pointer;
-    margin-left: 0.5rem;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
   `;
   syncButton.onmouseover = () => {
-    syncButton.style.backgroundColor = "#059669";
+    syncButton.style.background = "rgba(16, 185, 129, 0.1)";
+    syncButton.style.color = "#059669";
+    syncButton.style.transform = "scale(1.1)";
   };
   syncButton.onmouseout = () => {
-    syncButton.style.backgroundColor = "#10b981";
+    syncButton.style.background = "transparent";
+    syncButton.style.color = "#10b981";
+    syncButton.style.transform = "scale(1)";
   };
-  header.appendChild(syncButton);
+  headerButtons.appendChild(syncButton);
 
   const content = document.createElement("div");
   content.className = "transcript-content";
@@ -1145,8 +1239,8 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
   content.style.cssText = `
     max-height: ${maxHeight};
     overflow-y: auto;
-    padding: 1rem;
-    background-color: transparent;
+    padding: 1.5rem;
+    background-color: transparent !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   `;
   container.appendChild(content);
@@ -1199,17 +1293,31 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
     chunkHeader.className = "transcript-chunk-header";
     chunkHeader.style.cssText = `
       color: #2563eb;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      font-size: 0.9rem;
+          font-size: 16px;
+
+      line-height: 0.5em;
       font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-      margin-bottom: 0.5rem;
-      margin-top: 1rem;
-      padding: 0.25rem 0.5rem;
-      background-color: rgba(37, 99, 235, 0.1);
-      border-radius: 0.25rem;
+      margin-bottom: 0.75rem;
+      margin-top: 1.25rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border-left: 3px solid #2563eb;
       display: inline-block;
-    `;
+      transition: all 0.2s ease;
+      `;
+    // background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    chunkHeader.onmouseover = function () {
+      // (this as HTMLElement).style.background =
+      //   "linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%)";
+      (this as HTMLElement).style.transform = "translateX(4px)";
+    };
+    chunkHeader.onmouseout = function () {
+      // (this as HTMLElement).style.background =
+      //   "linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%)";
+      (this as HTMLElement).style.transform = "translateX(0)";
+    };
     chunkHeader.textContent = formatTimestamp(chunk.start);
     chunkHeader.onclick = () => {
       const video = document.querySelector("video");
@@ -1258,18 +1366,15 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
       textEl.textContent = lineData.text;
       textEl.style.cssText = `
         color: #1f2937;
-        font-size: 1.1rem;
-        line-height: 1.6;
+        font-size: 16px;
+        line-height: 0.5em;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         transition: color 0.3s ease;
         cursor: pointer;
+        letter-spacing: -0.005em;
+        user-select: text;
       `;
-      textEl.onclick = () => {
-        const video = document.querySelector("video");
-        if (video) {
-          video.currentTime = lineData.start;
-        }
-      };
+      // No click handler here - text clicks will be handled by initializeTranscriptSelection
 
       lineEl.appendChild(textEl);
       content.appendChild(lineEl);
@@ -1281,50 +1386,64 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
     if (isDarkMode) {
       // Dark mode styles
       container.style.cssText = `
-        background: rgba(31, 41, 55, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(55, 65, 81, 0.5);
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        background: rgba(0, 0, 0, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(60, 60, 60, 0.6);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 4px 12px -4px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
       `;
       header.style.cssText = `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem;
-        border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(60, 60, 60, 0.5);
         cursor: pointer;
-        background-color: rgba(17, 24, 39, 0.5);
-      `;
+         background: linear-gradient(135deg, rgba(20, 20, 20, 0.8) 0%, rgba(0, 0, 0, 0.95) 100%);
+        gap: 1rem;
+        `;
       title.style.cssText = `
-        font-size: 2rem;
-        font-weight: 600;
-        color: #f9fafb;
+       font-size: 16px;
+        line-height: 0.5em;
+        font-weight: 700;
+        color: #f0f9ff;
         display: flex;
         align-items: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
       `;
       arrowSpan.style.cssText = `
-        margin-left: 0.5rem;
+        margin-left: auto;
         color: #9ca3af;
       `;
+      // background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       copyButton.style.cssText = `
-        background-color: #4a5f7d;
         color: #ffffff;
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.375rem;
-        font-size: 2rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
+        background:transparent !important;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: none;
         cursor: pointer;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        white-space: nowrap;
       `;
       copyButton.onmouseover = () => {
-        copyButton.style.backgroundColor = "#13334c";
+        // copyButton.style.background =
+        //   "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)";
+        copyButton.style.boxShadow = "0 6px 20px rgba(37, 99, 235, 0.4)";
+        copyButton.style.transform = "translateY(-2px)";
       };
       copyButton.onmouseout = () => {
-        copyButton.style.backgroundColor = "#4a5f7d";
+        // copyButton.style.background =
+        //   "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
+        copyButton.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+        copyButton.style.transform = "translateY(0)";
       };
       content.style.cssText = `
         max-height: ${maxHeight};
@@ -1343,7 +1462,7 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
           margin-right: 0.75rem;
           display: inline-block;
           min-width: 50px;
-          font-size: 2rem;
+          font-size: 16px;
           font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
         `;
       });
@@ -1351,8 +1470,8 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
       texts.forEach((t) => {
         (t as HTMLElement).style.cssText = `
           color: #e5e7eb;
-          font-size: 2rem;
-          line-height: 1.7;
+          font-size: 16px;
+          line-height: 0.5em;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           font-weight: 400;
           letter-spacing: 0.01em;
@@ -1361,57 +1480,68 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
     } else {
       // Light mode styles
       container.style.cssText = `
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(229, 231, 235, 0.5);
-        border-radius: 0.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(229, 231, 235, 0.8);
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
       `;
       header.style.cssText = `
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 1rem;
-        border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.6);
         cursor: pointer;
-        background-color: rgba(249, 250, 251, 0.5);
+        background: linear-gradient(135deg, rgba(249, 250, 251, 0.8) 0%, rgba(243, 244, 246, 0.6) 100%);
+        gap: 1rem;
       `;
       title.style.cssText = `
-        font-size: 2rem;
-        font-weight: 600;
+        font-size: 16px;
+        line-height: 0.5em;
+        font-weight: 700;
         color: #1f2937;
         display: flex;
         align-items: center;
+        gap: 0.5rem;
+        letter-spacing: -0.01em;
       `;
       arrowSpan.style.cssText = `
-        margin-left: 0.5rem;
-        color: #9ca3af;
+        margin-left: auto;
+        color: #d1d5db;
       `;
       copyButton.style.cssText = `
-        background-color: #d3d6da;
-        color: #1f2937;
-        padding: 0.25rem 0.75rem;
-        border-radius: 0.375rem;
-        font-size: 2rem;
-        font-weight: 500;
-        transition: background-color 0.2s;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border: none;
         cursor: pointer;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        white-space: nowrap;
       `;
       copyButton.onmouseover = () => {
-        copyButton.style.backgroundColor = "#fff";
-        copyButton.style.border = "1px solid #575757";
+        copyButton.style.background =
+          "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)";
+        copyButton.style.boxShadow = "0 6px 20px rgba(37, 99, 235, 0.4)";
+        copyButton.style.transform = "translateY(-2px)";
       };
       copyButton.onmouseout = () => {
-        copyButton.style.backgroundColor = "#d3d6da";
-        copyButton.style.border = "none";
+        copyButton.style.background =
+          "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
+        copyButton.style.boxShadow = "0 4px 12px rgba(59, 130, 246, 0.3)";
+        copyButton.style.transform = "translateY(0)";
       };
       content.style.cssText = `
         max-height: ${maxHeight};
         overflow-y: auto;
-        padding: 1rem;
+        padding: 1.5rem;
         background-color: transparent;
       `;
 
@@ -1425,7 +1555,7 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
           margin-right: 0.75rem;
           display: inline-block;
           min-width: 50px;
-          font-size: 2rem;
+          font-size: 16px;
           font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
         `;
       });
@@ -1433,8 +1563,8 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
       texts.forEach((t) => {
         (t as HTMLElement).style.cssText = `
           color: #1f2937;
-          font-size: 2rem;
-          line-height: 1.7;
+          font-size: 16px;
+          line-height: 0.5em;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           font-weight: 400;
           letter-spacing: 0.01em;
@@ -1464,6 +1594,20 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
     attributeFilter: ["class"],
   });
   observer.observe(document.body, { attributes: true });
+
+  // Track user scrolling to disable auto-scroll when user manually scrolls
+  let isUserScrolling = false;
+  let scrollTimeout: number;
+
+  content.addEventListener("scroll", () => {
+    isUserScrolling = true;
+    // Clear previous timeout
+    clearTimeout(scrollTimeout);
+    // Re-enable auto-scroll after user stops scrolling for 3 seconds
+    scrollTimeout = window.setTimeout(() => {
+      isUserScrolling = false;
+    }, 3000);
+  });
 
   const video = document.querySelector("video");
   if (video) {
@@ -1512,6 +1656,11 @@ function displayTranscript(transcript: { text: string; start: number }[]) {
 
           if (timestampEl) {
             timestampEl.style.color = "#3b82f6";
+          }
+
+          // Auto-scroll to active line if user is not manually scrolling
+          if (!isUserScrolling) {
+            lineEl.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         } else {
           lineEl.classList.remove("active");
@@ -1850,7 +1999,7 @@ function updatePopupTheme(popup: HTMLDivElement): void {
 
   // Update main popup background
   popup.style.background = isDark
-    ? "rgba(31, 41, 55, 0.98)"
+    ? "rgba(0, 0, 0, 0.95)"
     : "rgba(255, 255, 255, 0.98)";
   popup.style.boxShadow = `0 8px 32px rgba(0, 0, 0, ${
     isDark ? "0.3" : "0.15"
@@ -1862,7 +2011,7 @@ function updatePopupTheme(popup: HTMLDivElement): void {
   ) as HTMLElement;
   if (header) {
     header.style.background = isDark
-      ? "rgba(31, 41, 55, 0.98)"
+      ? "rgba(0, 0, 0, 0.95)"
       : "rgba(255, 255, 255, 0.98)";
     const title = header.querySelector("h3") as HTMLElement;
     if (title) title.style.color = isDark ? "#f9fafb" : "#1f2937";
@@ -1998,7 +2147,7 @@ function createTranslationPopup(): HTMLDivElement {
       <button id="close-translation-popup" style="
         background: none;
         border: none;
-        font-size: 20px;
+        font-size: 16px;
         cursor: pointer;
         padding: 0;
         width: 24px;
@@ -2010,7 +2159,7 @@ function createTranslationPopup(): HTMLDivElement {
       ">×</button>
     </div>
     
-    <div id="translation-content" style="line-height: 1.6;">
+    <div id="translation-content" style="line-height: 0.5em;">
       <div id="translation-loading" style="text-align: center; padding: 20px;">
         <div style="
           border-radius: 50%;
@@ -2070,7 +2219,7 @@ function createTranslationPopup(): HTMLDivElement {
             padding: 10px 12px;
             border-radius: 6px;
             font-size: 13px;
-            line-height: 1.6;
+            line-height: 0.5em;
             word-wrap: break-word;
           "></div>
         </div>
@@ -2123,10 +2272,8 @@ function createTranslationPopup(): HTMLDivElement {
         currentThemeState ? "dark" : "light"
       );
 
-      // Update popup if it's visible
-      if (popup.style.display === "block") {
-        updatePopupTheme(popup);
-      }
+      // Always update popup theme, regardless of visibility
+      updatePopupTheme(popup);
     }
   });
 
@@ -2135,12 +2282,28 @@ function createTranslationPopup(): HTMLDivElement {
     attributes: true,
     attributeFilter: ["dark", "class"],
     attributeOldValue: true,
+    subtree: false,
   });
 
   // Also watch for body style changes
   themeObserver.observe(document.body, {
     attributes: true,
     attributeFilter: ["style"],
+    subtree: false,
+  });
+
+  // Also observe prefers-color-scheme media query changes
+  const prefersColorScheme = window.matchMedia("(prefers-color-scheme: dark)");
+  prefersColorScheme.addEventListener("change", () => {
+    const currentThemeState = isYouTubeDarkMode();
+    if (currentThemeState !== previousThemeState) {
+      previousThemeState = currentThemeState;
+      console.log(
+        "AI Popup: System theme changed to",
+        currentThemeState ? "dark" : "light"
+      );
+      updatePopupTheme(popup);
+    }
   });
 
   // Close button handler
@@ -2367,43 +2530,68 @@ function initializeTranscriptSelection(): void {
   console.log("Initializing transcript text selection handler...");
   isTranscriptSelectionInitialized = true;
 
+  let mouseDownTarget: HTMLElement | null = null;
+  let isSelecting = false;
+
+  document.addEventListener("mousedown", (e) => {
+    mouseDownTarget = e.target as HTMLElement;
+    isSelecting = false; // Reset on mousedown
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    // If mouse moves while button is down, user is selecting/dragging
+    if (
+      mouseDownTarget &&
+      e.buttons === 1 &&
+      mouseDownTarget !== (e.target as HTMLElement)
+    ) {
+      isSelecting = true;
+    }
+  });
+
   document.addEventListener("mouseup", (e) => {
     const selection = window.getSelection();
     const selectedText = selection?.toString().trim();
+    const target = e.target as HTMLElement;
+    const transcriptContainer = document.getElementById("transcript-container");
 
-    if (selectedText && selectedText.length > 0 && selectedText.length < 300) {
-      // Check if selection is within transcript
-      const target = e.target as HTMLElement;
-      const transcriptContainer = document.getElementById(
-        "transcript-container"
-      );
+    // Check if click/selection is within transcript
+    const isInTranscript =
+      target.closest(".transcript-line, .transcript-text") !== null ||
+      transcriptContainer?.contains(target);
 
-      // Check if the target or any parent is a transcript line
-      const isInTranscript =
-        target.closest(".transcript-line, .transcript-text") !== null ||
-        transcriptContainer?.contains(target);
+    if (!isInTranscript) return;
 
-      console.log(
-        "Selection:",
-        selectedText,
-        "Container found:",
-        !!transcriptContainer,
-        "Within transcript:",
-        isInTranscript
-      );
-
-      if (isInTranscript) {
-        const range = selection!.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-
-        console.log("Showing translation popup for:", selectedText);
-
-        // Show popup near selection
-        showTranslationPopup(
-          selectedText,
-          rect.left + window.scrollX,
-          rect.bottom + window.scrollY + 10
-        );
+    // Case 1: User selected text by dragging (show popup)
+    if (
+      selectedText &&
+      selectedText.length > 2 &&
+      selectedText.length < 300 &&
+      isSelecting
+    ) {
+      console.log("Showing translation popup for selected text:", selectedText);
+      // AI Translation popup disabled for now
+      // showTranslationPopup(
+      //   selectedText,
+      //   rect.left + window.scrollX,
+      //   rect.bottom + window.scrollY + 10
+      // );
+    }
+    // Case 2: User single-clicked on text (show popup for any text)
+    else if (
+      !isSelecting &&
+      target.closest(".transcript-text") !== null &&
+      !target.closest(".transcript-chunk-header")
+    ) {
+      const textContent = target.textContent?.trim() || "";
+      if (textContent && textContent.length > 0) {
+        console.log("Showing translation popup for clicked text:", textContent);
+        // AI Translation popup disabled for now
+        // showTranslationPopup(
+        //   textContent,
+        //   rect.left + window.scrollX,
+        //   rect.bottom + window.scrollY + 10
+        // );
       }
     }
   });
