@@ -34,7 +34,9 @@ const TranscriptHeader: React.FC<TranscriptHeaderProps> = ({
         >
           Video Transcript
         </h2>
-        <span className={`transition-transform ${isExpanded ? "" : "rotate-180"}`}>
+        <span
+          className={`transition-transform ${isExpanded ? "" : "rotate-180"}`}
+        >
           ▲
         </span>
       </div>

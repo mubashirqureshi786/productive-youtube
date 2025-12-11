@@ -1,11 +1,13 @@
 # Code Cleanup Summary
 
 ## Overview
+
 Major codebase refactoring to improve maintainability, readability, and organization. Removed unused code and created modular React components.
 
 ## Changes Made
 
 ### 1. **Removed Unused AI Translation Code** (~570 lines removed)
+
 - Deleted entire AI translation popup functionality (lines 1953-2520 in content.ts)
 - Removed functions:
   - `createTranslationPopup()`
@@ -22,17 +24,21 @@ Major codebase refactoring to improve maintainability, readability, and organiza
 ### 2. **Created Modular React Components**
 
 #### New Components:
+
 1. **TranscriptHeader.tsx** (76 lines)
+
    - Header with title, expand/collapse toggle
    - Copy and Sync action buttons
    - Proper TypeScript props interface
 
 2. **TranscriptLine.tsx** (47 lines)
+
    - Individual transcript line display
    - Active state highlighting
    - Hover effects
 
 3. **TranscriptChunk.tsx** (53 lines)
+
    - Groups transcript lines into 25-second chunks
    - Clickable timestamp headers
    - Uses TranscriptLine as child component
@@ -44,6 +50,7 @@ Major codebase refactoring to improve maintainability, readability, and organiza
    - User scroll detection
 
 #### Component Hierarchy:
+
 ```
 TranscriptViewer
 ├── TranscriptHeader
@@ -56,7 +63,9 @@ TranscriptViewer
 ### 3. **Created Utility Modules**
 
 #### utils/helpers.ts (95 lines)
+
 Centralized utility functions:
+
 - `isYouTubeDarkMode()` - Theme detection
 - `formatTimestamp()` - Time formatting (MM:SS or HH:MM:SS)
 - `decodeHtmlEntities()` - HTML entity decoder
@@ -65,7 +74,9 @@ Centralized utility functions:
 - `debounce()` - Function debouncing
 
 #### types/index.ts (31 lines)
+
 Shared TypeScript interfaces:
+
 - `VideoInfo`
 - `Settings`
 - `TranscriptLine`
@@ -75,6 +86,7 @@ Shared TypeScript interfaces:
 ### 4. **File Organization**
 
 **Before:**
+
 ```
 src/
 ├── scripts/
@@ -85,6 +97,7 @@ src/
 ```
 
 **After:**
+
 ```
 src/
 ├── scripts/
@@ -106,15 +119,16 @@ src/
 
 ### Lines of Code Comparison:
 
-| Component | Before | After | Change |
-|-----------|--------|-------|--------|
-| content.ts | 2606 | 2060 | -546 (-21%) |
-| React Components | 182 | 518 | +336 |
-| Utilities | 0 | 95 | +95 |
-| Types | 0 | 31 | +31 |
-| **Total** | **2788** | **2704** | **-84 (-3%)** |
+| Component        | Before   | After    | Change        |
+| ---------------- | -------- | -------- | ------------- |
+| content.ts       | 2606     | 2060     | -546 (-21%)   |
+| React Components | 182      | 518      | +336          |
+| Utilities        | 0        | 95       | +95           |
+| Types            | 0        | 31       | +31           |
+| **Total**        | **2788** | **2704** | **-84 (-3%)** |
 
 ### Build Output:
+
 - `content_script.js`: **35.30 kB** (gzip: 9.24 kB) - No change
 - Build time: **~2.5s**
 - No TypeScript errors
@@ -123,23 +137,27 @@ src/
 ## Benefits
 
 ### ✅ Maintainability
+
 - **Modular components** - Easy to find and update specific functionality
 - **Clear separation** - Logic separated from presentation
 - **Single Responsibility** - Each component has one job
 
 ### ✅ Readability
+
 - **Component names** clearly describe purpose
 - **Small files** - No 2600-line monsters
 - **Type safety** - Shared interfaces prevent errors
 - **Reusable utilities** - Common functions in one place
 
 ### ✅ Developer Experience
+
 - **Easier debugging** - Smaller files, clearer stack traces
 - **Better IDE support** - TypeScript autocomplete works better
 - **Faster navigation** - Jump to component instead of scrolling
 - **Easier testing** - Components can be tested in isolation
 
 ### ✅ Performance
+
 - **Same bundle size** - No performance regression
 - **Tree-shaking friendly** - Unused utilities won't be bundled
 - **Lazy loading ready** - Components can be code-split later
@@ -160,9 +178,9 @@ const time = formatTimestamp(125); // "2:05"
 // Render transcript
 <TranscriptViewer
   chunks={chunks}
-  onSeek={(time) => video.currentTime = time}
+  onSeek={(time) => (video.currentTime = time)}
   isDarkMode={isDark}
-/>
+/>;
 ```
 
 ### Adding New Features
@@ -174,6 +192,7 @@ const time = formatTimestamp(125); // "2:05"
 ## Future Improvements
 
 With this new structure, it's easy to add:
+
 - 🔍 Search within transcript
 - 📍 Bookmark specific timestamps
 - 💾 Export transcript to file

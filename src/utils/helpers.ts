@@ -7,7 +7,7 @@
  */
 export function isYouTubeDarkMode(): boolean {
   const htmlElement = document.documentElement;
-  
+
   // Check YouTube's dark mode attribute
   if (htmlElement.hasAttribute("dark")) return true;
   if (htmlElement.classList.contains("dark")) return true;
@@ -38,7 +38,9 @@ export function formatTimestamp(seconds: number): string {
   const secs = Math.floor(seconds % 60);
 
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   }
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }

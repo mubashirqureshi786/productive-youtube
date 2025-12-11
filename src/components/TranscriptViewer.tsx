@@ -35,7 +35,10 @@ const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
 
       for (const chunk of chunks) {
         for (const line of chunk.lines) {
-          if (currentTime >= line.start && currentTime < line.start + line.duration) {
+          if (
+            currentTime >= line.start &&
+            currentTime < line.start + line.duration
+          ) {
             setActiveLineStart(line.start);
             foundLine = true;
 
@@ -45,7 +48,10 @@ const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
                 `[data-start="${line.start}"]`
               );
               if (activeElement) {
-                activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+                activeElement.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
               }
             }
             break;
@@ -96,7 +102,8 @@ const TranscriptViewer: React.FC<TranscriptViewerProps> = ({
         activeLine.scrollIntoView({ behavior: "smooth", block: "center" });
       } else {
         // Find closest line
-        const lines = contentRef.current.querySelectorAll<HTMLElement>("[data-start]");
+        const lines =
+          contentRef.current.querySelectorAll<HTMLElement>("[data-start]");
         let closestLine: HTMLElement | null = null;
         let minDiff = Infinity;
 
