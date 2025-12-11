@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import TranscriptViewer from "./TranscriptViewer";
 import { useSettings, useDarkMode, useVideoElement, usePageNavigation } from "../hooks";
 import { fetchTranscript } from "../services/transcript";
@@ -18,7 +19,42 @@ export function TranscriptContainer() {
   const [chunks, setChunks] = useState<TranscriptChunk[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [container, setContainer] = useState<HTMLElement | null>(null);
 
+  // Find or create container in YouTube's sidebar
+  useEffect(() => {
+    if (!settings?.showTranscript || pathname !== "/watch") {
+      return;
+    }
+
+    const findContainer = () => {
+      // Try to find YouTube's secondary sidebar
+      let secondary = document.querySelector("#secondary") as HTMLElement;
+      
+      if (!secondary) {
+        secondary = document.querySelector("ytd-watch-next-secondary-results-renderer") as HTMLElement;
+      }
+
+      if (secondary) {
+        let transcriptDiv = document.getElementById("productive-transcript-container");
+        if (!transcriptDiv) {
+          transcriptDiv = document.createElement("div");
+          transcriptDiv.id = "productive-transcript-container";
+          secondary.prepend(transcriptDiv);
+        }
+        setContainer(transcriptDiv);
+      }
+    };
+
+    findContainer();
+
+    // Keep trying until we find it
+    const interval = setInterval(findContainer, 500);
+    
+    return () => clearInterval(interval);
+  }, [settings?.showTranscript, pathname, videoId]);
+
+  // Fetch transcript
   useEffect(() => {
     if (!settings?.showTranscript || pathname !== "/watch" || !videoId) {
       setChunks([]);
@@ -52,41 +88,45 @@ export function TranscriptContainer() {
     console.log("Transcript copied:", text.substring(0, 50) + "...");
   };
 
-  if (!settings?.showTranscript || pathname !== "/watch") {
+  if (!settings?.showTranscript || pathname !== "/watch" || !container) {
     return null;
   }
 
-  if (loading) {
+  const content = (() => {
+    if (loading) {
+      return (
+        <div className="p-4 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-2 text-sm text-gray-500">Loading transcript...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="p-4 text-center text-red-500">
+          <p>Failed to load transcript</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      );
+    }
+
+    if (chunks.length === 0) {
+      return null;
+    }
+
     return (
-      <div className="p-4 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="mt-2 text-sm text-gray-500">Loading transcript...</p>
-      </div>
+      <TranscriptViewer
+        chunks={chunks}
+        onSeek={handleSeek}
+        isDarkMode={isDarkMode}
+        maxHeight={settings.removeWatchPageSuggestions ? "calc(100vh - 180px)" : "24rem"}
+        onCopyTranscript={handleCopy}
+      />
     );
-  }
+  })();
 
-  if (error) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        <p>Failed to load transcript</p>
-        <p className="text-sm">{error}</p>
-      </div>
-    );
-  }
-
-  if (chunks.length === 0) {
-    return null;
-  }
-
-  return (
-    <TranscriptViewer
-      chunks={chunks}
-      onSeek={handleSeek}
-      isDarkMode={isDarkMode}
-      maxHeight={settings.removeWatchPageSuggestions ? "calc(100vh - 180px)" : "24rem"}
-      onCopyTranscript={handleCopy}
-    />
-  );
+  return createPortal(content, container);
 }
 
 /**

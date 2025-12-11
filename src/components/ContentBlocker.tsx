@@ -18,23 +18,34 @@ export function ContentBlocker() {
   const { settings } = useSettings();
 
   useEffect(() => {
-    if (!settings) return;
+    if (!settings) {
+      console.log("ContentBlocker: Waiting for settings...");
+      return;
+    }
+
+    console.log("ContentBlocker: Active with settings:", settings);
 
     const blockContent = throttle(() => {
+      let blocked = 0;
+
       if (settings.removeShorts) {
-        removeElements(SHORTS_SELECTORS);
+        blocked += removeElements(SHORTS_SELECTORS);
       }
 
       if (settings.removeShortsButton) {
-        removeElements(SHORTS_BUTTON_SELECTORS);
+        blocked += removeElements(SHORTS_BUTTON_SELECTORS);
       }
 
       if (settings.removeHomepageVideos && window.location.pathname === "/") {
-        removeElements(HOMEPAGE_VIDEO_SELECTORS);
+        blocked += removeElements(HOMEPAGE_VIDEO_SELECTORS);
       }
 
       if (settings.removeWatchPageSuggestions && window.location.pathname === "/watch") {
-        removeElements(VIDEO_SUGGESTIONS_SELECTORS);
+        blocked += removeElements(VIDEO_SUGGESTIONS_SELECTORS);
+      }
+
+      if (blocked > 0) {
+        console.log(`ContentBlocker: Removed ${blocked} elements`);
       }
     }, 500);
 
@@ -50,6 +61,7 @@ export function ContentBlocker() {
 
     // Listen for navigation
     const handleNavigation = () => {
+      console.log("ContentBlocker: Page navigation detected");
       setTimeout(blockContent, 100);
     };
 
