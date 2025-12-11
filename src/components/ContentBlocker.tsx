@@ -23,7 +23,13 @@ export function ContentBlocker() {
       return;
     }
 
-    console.log("ContentBlocker: Active with settings:", settings);
+    console.log("ContentBlocker: Settings changed:", {
+      removeShorts: settings.removeShorts,
+      removeShortsButton: settings.removeShortsButton,
+      removeHomepageVideos: settings.removeHomepageVideos,
+      removeWatchPageSuggestions: settings.removeWatchPageSuggestions,
+      showTranscript: settings.showTranscript,
+    });
 
     const blockContent = throttle(() => {
       let blocked = 0;
@@ -40,7 +46,10 @@ export function ContentBlocker() {
         blocked += removeElements(HOMEPAGE_VIDEO_SELECTORS);
       }
 
-      if (settings.removeWatchPageSuggestions && window.location.pathname === "/watch") {
+      if (
+        settings.removeWatchPageSuggestions &&
+        window.location.pathname === "/watch"
+      ) {
         blocked += removeElements(VIDEO_SUGGESTIONS_SELECTORS);
       }
 

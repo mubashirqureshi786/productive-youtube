@@ -15,20 +15,17 @@ export interface TranslationResult {
  */
 export async function translateText(text: string): Promise<TranslationResult> {
   return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(
-      { type: "TRANSLATE_TEXT", text },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-          return;
-        }
-
-        if (response.success) {
-          resolve(response.data);
-        } else {
-          reject(new Error(response.error || "Translation failed"));
-        }
+    chrome.runtime.sendMessage({ type: "TRANSLATE_TEXT", text }, (response) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
       }
-    );
+
+      if (response.success) {
+        resolve(response.data);
+      } else {
+        reject(new Error(response.error || "Translation failed"));
+      }
+    });
   });
 }

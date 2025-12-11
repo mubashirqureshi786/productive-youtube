@@ -6,7 +6,12 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import TranscriptViewer from "./TranscriptViewer";
-import { useSettings, useDarkMode, useVideoElement, usePageNavigation } from "../hooks";
+import {
+  useSettings,
+  useDarkMode,
+  useVideoElement,
+  usePageNavigation,
+} from "../hooks";
 import { fetchTranscript } from "../services/transcript";
 import type { TranscriptEntry, TranscriptChunk } from "../types";
 
@@ -30,13 +35,17 @@ export function TranscriptContainer() {
     const findContainer = () => {
       // Try to find YouTube's secondary sidebar
       let secondary = document.querySelector("#secondary") as HTMLElement;
-      
+
       if (!secondary) {
-        secondary = document.querySelector("ytd-watch-next-secondary-results-renderer") as HTMLElement;
+        secondary = document.querySelector(
+          "ytd-watch-next-secondary-results-renderer"
+        ) as HTMLElement;
       }
 
       if (secondary) {
-        let transcriptDiv = document.getElementById("productive-transcript-container");
+        let transcriptDiv = document.getElementById(
+          "productive-transcript-container"
+        );
         if (!transcriptDiv) {
           transcriptDiv = document.createElement("div");
           transcriptDiv.id = "productive-transcript-container";
@@ -50,7 +59,7 @@ export function TranscriptContainer() {
 
     // Keep trying until we find it
     const interval = setInterval(findContainer, 500);
-    
+
     return () => clearInterval(interval);
   }, [settings?.showTranscript, pathname, videoId]);
 
@@ -120,7 +129,9 @@ export function TranscriptContainer() {
         chunks={chunks}
         onSeek={handleSeek}
         isDarkMode={isDarkMode}
-        maxHeight={settings.removeWatchPageSuggestions ? "calc(100vh - 180px)" : "24rem"}
+        maxHeight={
+          settings.removeWatchPageSuggestions ? "calc(100vh - 180px)" : "24rem"
+        }
         onCopyTranscript={handleCopy}
       />
     );
@@ -141,7 +152,9 @@ function chunkTranscript(transcript: TranscriptEntry[]): TranscriptChunk[] {
     const chunkStart = Math.floor(entry.start / CHUNK_SIZE) * CHUNK_SIZE;
 
     const nextStart =
-      index < transcript.length - 1 ? transcript[index + 1].start : entry.start + 2;
+      index < transcript.length - 1
+        ? transcript[index + 1].start
+        : entry.start + 2;
     const duration = nextStart - entry.start;
 
     const line = {

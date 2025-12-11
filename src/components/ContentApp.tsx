@@ -11,7 +11,7 @@ export function ContentApp() {
     <>
       {/* Non-visual component that blocks unwanted content */}
       <ContentBlocker />
-      
+
       {/* Transcript viewer (only shows on watch pages) */}
       <TranscriptContainer />
     </>

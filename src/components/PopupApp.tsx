@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from "react";
-
-interface Settings {
-  // Algorithm Blockers
-  removeShorts: boolean;
-  removeShortsButton: boolean;
-  removeHomepageVideos: boolean;
-  removeWatchPageSuggestions: boolean;
-  showTranscript: boolean;
-  huggingfaceApiKey?: string;
-}
+import type { Settings } from "../types";
 
 const ToggleSwitch: React.FC<{
   id: string;
@@ -53,7 +44,6 @@ const PopupApp: React.FC = () => {
     removeHomepageVideos: true,
     removeWatchPageSuggestions: true,
     showTranscript: false,
-    huggingfaceApiKey: "",
   };
 
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -63,6 +53,7 @@ const PopupApp: React.FC = () => {
     if (typeof chrome !== "undefined" && chrome.storage) {
       const keys = Object.keys(defaultSettings);
       chrome.storage.local.get(keys, (result) => {
+        console.log("Popup: Loaded settings from storage:", result);
         const loadedSettings = { ...defaultSettings };
         keys.forEach((key) => {
           if (result[key] !== undefined) {
@@ -76,12 +67,17 @@ const PopupApp: React.FC = () => {
 
   // Generic toggle handler
   const handleToggle = (key: keyof Settings, value: boolean) => {
+    console.log(`Popup: Toggle ${key} to ${value}`);
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
 
     if (typeof chrome !== "undefined" && chrome.storage) {
       chrome.storage.local.set({ [key]: value }, () => {
-        console.log(`Setting ${key} saved:`, value);
+        console.log(`Popup: Setting ${key} saved:`, value);
+        // Verify it was saved
+        chrome.storage.local.get([key], (result) => {
+          console.log(`Popup: Verified ${key} in storage:`, result[key]);
+        });
       });
     }
   };

@@ -3,11 +3,7 @@
  * Handles fetching and parsing YouTube transcripts
  */
 
-import {
-  getVideoId,
-  extractApiKey,
-  extractTranscriptUrl,
-} from "./youtube";
+import { getVideoId, extractApiKey, extractTranscriptUrl } from "./youtube";
 import { decodeHtmlEntities, cleanTranscriptText } from "../utils/helpers";
 import type { TranscriptEntry } from "../types";
 

@@ -15,11 +15,13 @@ export function useSettings() {
 
   useEffect(() => {
     loadSettings().then((loadedSettings) => {
+      console.log("useSettings: Initial settings loaded:", loadedSettings);
       setSettings(loadedSettings);
       setLoading(false);
     });
 
     const cleanup = onSettingsChange((changes) => {
+      console.log("useSettings: Settings changed:", changes);
       setSettings((prev) => (prev ? { ...prev, ...changes } : null));
     });
 
