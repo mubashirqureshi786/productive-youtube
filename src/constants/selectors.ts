@@ -36,17 +36,24 @@ export const VIDEO_SUGGESTIONS_SELECTORS = [
   "ytd-item-section-renderer:has(ytd-compact-video-renderer)",
 ] as const;
 
+// Target individual video cards on homepage, NOT containers
+// These selectors target the actual video item elements that appear in the feed
 export const HOMEPAGE_VIDEO_SELECTORS = [
+  // Primary: Video items in the main homepage grid - MOST IMPORTANT
   "ytd-rich-item-renderer",
-  "ytd-rich-grid-row",
-  "ytd-rich-grid-renderer",
-  "ytd-two-column-browse-results-renderer #primary #contents",
-  'ytd-browse[page-subtype="home"] ytd-rich-grid-renderer',
-  'ytd-browse[page-subtype="home"] ytd-rich-item-renderer',
-  'ytd-browse[page-subtype="home"] ytd-rich-grid-row',
+
+  // Video item inside rich grid
+  "ytd-rich-grid-renderer ytd-rich-item-renderer",
+
+  // Direct children of rich grid (alternative structure)
+  "ytd-rich-grid-renderer > ytd-rich-item-renderer",
+
+  // Individual video renderers (legacy/fallback)
   "ytd-grid-video-renderer",
   "ytd-video-renderer",
-  "ytd-item-section-renderer",
+
+  // Fallback: row-based structure
+  "ytd-rich-grid-row ytd-rich-item-renderer",
 ] as const;
 
 export const VIDEO_END_SUGGESTIONS_SELECTORS = [
